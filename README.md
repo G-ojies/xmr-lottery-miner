@@ -59,3 +59,7 @@ Notes:
 - `setup.py` — preflight: checks Python, deps, the active backend, and config.
 - `build_randomx.sh` — one-shot builder for the real RandomX backend.
 - `config.toml` — wallet, mining, and pool settings.
+
+## License
+
+[MIT](LICENSE).
