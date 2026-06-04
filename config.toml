@@ -1,0 +1,22 @@
+# xmr-lottery-miner configuration
+# Edit these values, then run:  python main.py
+
+[wallet]
+# Your Monero (XMR) wallet address. Replace before mining for real.
+wallet_address = "42g6SBL7jzGWQeoEPNibCq3xFiNmfy79LatY6XW2p6YfgiWyCKzR8bxik5wycZUnhg8go2r4XPZe1PHykJexxqZ69z5VayM"
+# Label shown on the pool dashboard for this rig.
+worker_name = "lottery-rig-01"
+
+[mining]
+# Number of worker processes. Default 2, raise to match your core count.
+threads = 2
+# Hard cap on total CPU usage (percent of all cores). Workers sleep to stay under this.
+max_cpu_percent = 50
+# CPU temperature ceiling in Celsius. Above this, workers are temporarily parked.
+temp_limit = 75
+
+[pool]
+host = "gulf.moneroocean.stream"
+port = 10128
+# Pool password. MoneroOcean accepts "x".
+password = "x"

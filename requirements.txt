@@ -1,0 +1,8 @@
+rich
+psutil
+tomli
+
+# Optional: real RandomX (rx/0) proof-of-work so the pool accepts shares.
+# Needs a C/C++ toolchain to build. Without it the miner runs in demo mode.
+# Install with:  pip install pyrx
+# pyrx
