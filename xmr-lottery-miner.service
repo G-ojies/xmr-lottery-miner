@@ -1,0 +1,26 @@
+[Unit]
+Description=XMR Lottery Miner (headless, RandomX)
+# Wait for the network before starting; reconnects are handled internally too.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/greyat_labs/Development/xmr-lottery-miner
+ExecStart=/home/greyat_labs/Development/xmr-lottery-miner/.venv/bin/python run_headless.py
+
+# Be a polite background job: lowest CPU priority and idle I/O scheduling.
+Nice=19
+IOSchedulingClass=idle
+
+# Keep it running 24/7: restart on crash or pool-driven exit, with a short delay.
+Restart=always
+RestartSec=10
+
+# Graceful stop: SIGTERM the main process only (it stops workers via the core's
+# stop()), then SIGKILL the whole group if it overruns the timeout.
+KillMode=mixed
+TimeoutStopSec=20
+
+[Install]
+WantedBy=default.target

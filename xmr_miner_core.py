@@ -352,13 +352,28 @@ class Miner:
             t.start()
 
     def stop(self):
-        self.control["stop"] = True
+        # Ask workers to exit via the shared flag. The Manager may already be
+        # gone (e.g. systemd SIGTERMs the whole process group at once), so don't
+        # depend on this succeeding — we terminate the processes directly below.
+        try:
+            self.control["stop"] = True
+        except Exception:
+            pass
+        # Terminate worker processes via their own handles (no Manager needed).
         for p in self.procs:
             p.join(timeout=2)
             if p.is_alive():
                 p.terminate()
+        for p in self.procs:  # escalate to SIGKILL for anything still alive
+            p.join(timeout=2)
+            if p.is_alive():
+                p.kill()
         if self._stratum:
             self._stratum.close()
+        try:
+            self.mgr.shutdown()
+        except Exception:
+            pass
 
     def snapshot(self):
         with self._lock:

@@ -8,10 +8,13 @@ wallet_address = "42g6SBL7jzGWQeoEPNibCq3xFiNmfy79LatY6XW2p6YfgiWyCKzR8bxik5wycZ
 worker_name = "lottery-rig-01"
 
 [mining]
-# Number of worker processes. Default 2, raise to match your core count.
+# Number of worker processes = the HARD cap on cores used while hashing.
+# This machine has 8 cores; 2 keeps mining to ~25% and leaves the rest free.
 threads = 2
-# Hard cap on total CPU usage (percent of all cores). Workers sleep to stay under this.
-max_cpu_percent = 50
+# Soft cap on total system CPU (percent of all cores). Workers sleep to stay under.
+# Note: the RandomX dataset BUILD at startup briefly uses all cores regardless —
+# run under `nice` (see README) so that phase yields to interactive work.
+max_cpu_percent = 40
 # CPU temperature ceiling in Celsius. Above this, workers are temporarily parked.
 temp_limit = 75
 
