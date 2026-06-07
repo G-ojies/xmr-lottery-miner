@@ -155,8 +155,9 @@ def _worker_loop(idx, job, control, hash_counts, found_q):
     batch = RANDOMX_BATCH if HAVE_RANDOMX else HASH_BATCH
 
     while not control["stop"]:
-        # Park if the governor disabled this worker (thermal / cpu) — but keep looping.
-        if not control["active"][idx]:
+        # Park if paused (pool disconnected) or the governor disabled this worker
+        # (thermal / cpu) — but keep looping so we resume promptly.
+        if control["paused"] or not control["active"][idx]:
             time.sleep(0.25)
             continue
 
@@ -319,6 +320,10 @@ class Miner:
             "stop": False,
             "throttle_sleep": 0.0,
             "job_ver": 0,
+            # Global pause: workers park while the pool connection is down, so we
+            # don't burn CPU hashing a stale job we can't submit. Starts paused
+            # until the first successful login.
+            "paused": True,
             "active": self.mgr.list([True] * cfg.threads),
         })
         self.hash_counts = mp.Array("Q", cfg.threads)
@@ -416,6 +421,7 @@ class Miner:
                     self.stats.connected = True
                     self.stats.pool_msg = "logged in — mining"
                 self._apply_job(job)
+                self.control["paused"] = False  # resume workers now we're online
                 backoff = 2
                 while not self.control["stop"]:
                     msg = self._stratum.poll(timeout=1.0)
@@ -423,6 +429,7 @@ class Miner:
                         continue
                     self._handle_pool_msg(msg)
             except (OSError, ConnectionError, RuntimeError, ValueError) as e:
+                self.control["paused"] = True  # park workers while we're offline
                 with self._lock:
                     self.stats.connected = False
                     self.stats.pool_msg = f"disconnected: {e} — retrying in {backoff}s"
